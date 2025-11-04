@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Elixir 24/7</title>
+  <style>
+  body {
+    background: #f8f6f0;
+    color: #2c1810;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  header {
+    background: white;
+    padding: 14px 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  .logo {
+    font-size: 22px;
+    font-weight: 700;
+    color: #8B4513;
+  }
+  .section h2 {
+    margin-bottom: 16px;
+    color: #5D4037;
+    font-size: 22px;
+    text-align: center;
+  }
+  .category-btn {
+    padding: 8px 16px;
+    border: 2px solid #d7ccc8;
+    background: #f5f5f5;
+    border-radius: 24px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #5D4037;
+  }
+</style>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">🥃 Elixir 24/7</div>
+
+    <!-- Menú hamburguesa (solo en móvil) -->
+    <div class="menu-toggle" id="menu-toggle" onclick="toggleMenu()">☰</div>
+
+    <!-- BOTÓN DE MODO OSCURO/CLARO (se mantiene) -->
+    <button id="theme-toggle" class="theme-toggle">
+      <span id="theme-icon">🌙</span>
+      <span id="theme-text">Modo oscuro</span>
+    </button>
+
+    <!-- Menú horizontal (solo en tablet/PC) -->
+    <nav class="desktop-menu">
+      <a href="#" onclick="scrollToSection('combos-section')">Combos Premium</a>
+      <a href="#" onclick="scrollToSection('products-section')">Nuestra Selección</a>
+    </nav>
+
+    <!-- Barra de compra -->
+  <div id="purchase-bar">
+  <span id="purchase-count">0</span> productos | Total: S/ <span id="purchase-total">0.00</span>
+  <button onclick="sendOrderToWhatsApp()">Comprar ahora</button>
+  </div>
+
+    <!-- Menú móvil desplegable -->
+    <nav class="mobile-menu" id="mobile-menu">
+      <a href="#" onclick="scrollToSection('combos-section'); closeMenu()">Combos Premium</a>
+      <a href="#" onclick="scrollToSection('products-section'); closeMenu()">Nuestra Selección</a>
+    </nav>
+  </header>
+
+  <!-- Sección de Combos -->
+  <section class="section" id="combos-section">
+    <h2>🔥 Combos Premium</h2>
+    <div class="combos" id="combos-container"></div>
+  </section>
+
+  <!-- Sección de Productos -->
+  <section class="section" id="products-section">
+    <h2>Nuestra Selección</h2>
+    <div class="categories">
+      <button class="category-btn active" data-category="all">Todos</button>
+      <button class="category-btn" data-category="whisky">Whisky</button>
+      <button class="category-btn" data-category="ron">Ron</button>
+      <button class="category-btn" data-category="pisco">Pisco</button>
+      <button class="category-btn" data-category="cerveza">Cerveza</button>
+      <button class="category-btn" data-category="vino">Vino</button>
+      <button class="category-btn" data-category="Vodka">Vodka</button>
+      <button class="category-btn" data-category="Jagermeister">Jagermeister</button>
+      <button class="category-btn" data-category="fourloko">Four Loko</button>
+      <button class="category-btn" data-category="gaseosa">Gaseosas</button>
+      <button class="category-btn" data-category="hielo">Hielo</button>
+    </div>
+    <div class="products" id="products-container"></div>
+  </section>
+
+<script>
+
+// === DATOS DE Elixir 24/7 ===
+const combos = [
+  { id: 'c1', name: 'Combo Fiesta', description: 'Incluye: 1 Four Loko + 1 vino + Hielo de 1kg', 
+    price: 34.50, img: 'img/combo-fiesta.png' },
+  {id: 'c2', name: 'Combo Whisky', description: 'Incluye: 1 Old Times Red o Black + 1 Guaraná de 3Lt + Hielo de 1kg',
+    price: 48.50,  img: 'img/combo-2.png' },
+  { id: 'c3', name: 'Combo Peruano',description: 'Incluye: 1 Pisco Vargas + 1 Evervess 1.5L + Hielo de 1kg', 
+    price: 29.50, img: 'img/combo-peruano.png'},
+  { id: 'c4', name: 'Combo Trululú con vodka ', description: 'Incluye: 1 Russkaya(1L) + 1 sporade Tropical o blueberrry + Hielo de 1kg + Gomitas Trululu',
+     price: 36.50, img: 'img/combo-trululu.jpg' },
+  { id: 'c5', name: 'Cuba Libre', description: 'Incluye: 1 Ron Blanco + 1 Coca Cola de 3Lt + Hielo de 1kg', 
+    price: 44.50,  img: 'img/cuba-libre.jpeg' },
+];
+
+const products = [ 
+ // Whisky
+{ id: 'p1', name: 'Johnnie Walker Red Label (750ml)', category: 'whisky', price: 59.50, img: 'img/red-label.jpg' },
+{ id: 'p2', name: 'Johnnie Walker Black Label (750ml)', category: 'whisky', price: 144.50, img: 'img/black-label.jpg' },
+{ id: 'p3', name: 'Old times Red (750ml)', category: 'whisky', price: 23.50, img: 'img/old-time-red.jpg' },
+{ id: 'p4', name: 'Old times Black (750ml)', category: 'whisky', price: 23.50, img: 'img/old-time-black.jpg' },
+{ id: 'p5', name: 'Jack Daniels (1L)', category: 'whisky', price: 109.50, img: 'img/Jack-daniels.jpg' },
+
+  // Ron
+  { id: 'p6', name: 'Ron Cartavio XO', category: 'ron', price: 199.50, img: 'img/ron-cartavio.jpg' },
+  { id: 'p7', name: 'Ron Cartavio Solera ', category: 'ron', price: 49.50, img: 'img/ron-reserva.jpg' },
+  { id: 'p8', name: 'Ron Cartavio Reserva ', category: 'ron', price: 47.50, img: 'img/ron-reserva-8años.jpg' },
+  { id: 'p9', name: 'Ron Cartavio Blanco ', category: 'ron', price: 27.50, img: 'img/ron-blanco.jpg' },
+  
+  // Pisco
+  { id: 'p10', name: 'Pisco-Quebranta', category: 'pisco', price: 26.50, img: 'img/pisco-quebranta.jpg' },
+  { id: 'p11', name: 'Pisco-Vargas', category: 'pisco', price: 23.50, img: 'img/pisco-vargas.jpg' },
+  
+  // Cerveza
+  { id: 'p12', name: 'Cusqueña', category: 'cerveza', price: 8.50, img: 'img/cusqueña.jpg' },
+  { id: 'p13', name: 'Pilsen', category: 'cerveza', price: 6.00, img: 'img/pilsen.jpg' },
+  { id: 'p14', name: 'Cristal', category: 'cerveza', price: 5.50, img: 'img/Cristal.jpg' },
+  { id: 'p15', name: 'Six Pack Corona', category: 'cerveza', price: 16.50, img: 'img/Corona.jpg' },
+  { id: 'p16', name: 'Cusqueña lata', category: 'cerveza', price: 28.50, img: 'img/cusqueña-lata.jpg' },
+  { id: 'p17', name: 'Pilsen lata', category: 'cerveza', price: 28.50, img: 'img/pilsen-lata.png' },
+  { id: 'p18', name: 'Cristal lata', category: 'cerveza', price: 28.50, img: 'img/Cristal-lata.jpg' },
+  
+  // Vino
+  { id: 'p19', name: 'vino Borgoña', category: 'vino', price: 16.50, img: 'img/vino-borgoña.jpg' },
+  { id: 'p20', name: 'vino Cabernet', category: 'vino', price: 48.50, img: 'img/vino-cabernet.jpg' },
+  { id: 'p21', name: 'vino Rose', category: 'vino', price: 48.50, img: 'img/vino-rose.jpg' },
+
+  // Vodka
+  { id: 'p22', name: 'Vodka RUSSKAYA Botella 1L', category: 'Vodka', price: 23.50, img: 'img/russkaya.jpg' },
+  { id: 'p23', name: 'Vodka Skyy Botella 1L', category: 'Vodka', price: 53.50, img: 'img/skyy.jpg' },
+  { id: 'p24', name: 'Vodka smirnoff Raspberry 1L', category: 'Vodka', price: 57.50, img: 'img/smirnoff-raspberry.jpg' },
+  { id: 'p25', name: 'Vodka smirnoff Green Apple 1L', category: 'Vodka', price: 57.50, img: 'img/verde.jpg' },
+  { id: 'p26', name: 'Mike´s Lemonade', category: 'Vodka', price: 4.50, img: 'img/mikes.png' },
+  { id: 'p27', name: 'Mike´s Strawberry', category: 'Vodka', price: 4.50, img: 'img/mikes-fresa.jpg' },
+  { id: 'p28', name: 'Mike´s Passion Fruit', category: 'Vodka', price: 4.50, img: 'img/mikes-maracuya.png' },
+  { id: 'p29', name: 'Hit Mojito', category: 'Vodka', price: 4.50, img: 'img/hit-mojito.jpg' },
+  { id: 'p30', name: 'Hit Piña Colada', category: 'Vodka', price: 4.50, img: 'img/hit-piñacolada.jpg' },
+  { id: 'p31', name: 'Wild Apple', category: 'Vodka', price: 4.50, img: 'img/Wild-apple.jpg' },
+  { id: 'p32', name: 'Wild Rojo', category: 'Vodka', price: 4.50, img: 'img/Wild-rojo.jpeg' },
+
+  //Jagger
+  { id: 'p33', name: 'Jagermeister (350Ml)', category: 'Jagermeister', price: 70.50, img: 'img/jagger.png' },
+
+  // FOUR LOKO
+{ id: 'p34', name: 'Four Loko Purple(473ml)', category: 'fourloko', price: 13.50, img: 'img/four-purple.jpg' },
+{ id: 'p35', name: 'Four Loko Blue (473ml)', category: 'fourloko', price: 13.50, img: 'img/four-blue.jpg' },
+{ id: 'p36', name: 'Four Loko Green (473ml)', category: 'fourloko', price: 13.50, img: 'img/four-green.jpg' },
+{ id: 'p37', name: 'Four Loko Gold (473ml)', category: 'fourloko', price: 15.50, img: 'img/four-gold.jpg' },
+
+  // === 🥤 GASEOSAS COMPLETAS - CON TODOS LOS TAMAÑOS ===
+  // Coca-Cola
+  { id: 'p38', name: 'Coca-Cola (500ml)', category: 'gaseosa', price: 4.50, img: 'img/coca-cola 500ml.jpg' },
+  { id: 'p39', name: 'Coca-Cola (1.5L)', category: 'gaseosa', price: 5.50, img: 'img/coca-cola-1.5.jpg' },
+  { id: 'p40', name: 'Coca-Cola (2.5L)', category: 'gaseosa', price: 7.50, img: 'img/Coca-Cola-2.5.jpg' },
+  { id: 'p41', name: 'Coca-Cola (3L)', category: 'gaseosa', price: 10.50, img: 'img/coca-cola-3Lt.jpg' },
+
+  // Fanta Naranja
+  { id: 'p42', name: 'Fanta Naranja (500ml)', category: 'gaseosa', price: 3.50, img: 'img/Fanta-Naranja-500ml.jpg' },
+  { id: 'p43', name: 'Fanta Naranja (2L)', category: 'gaseosa', price: 6.50, img: 'img/fanta-naranja-2l.jpg' },
+
+  // Sprite
+  { id: 'p44', name: 'Sprite (500ml)', category: 'gaseosa', price: 3.70, img: 'img/sprite-500ml.jpg' },
+  { id: 'p45', name: 'Sprite (3L)', category: 'gaseosa', price: 6.50, img: 'img/sprite-3L.jpg' },
+
+  // Pepsi
+  { id: 'p46', name: 'Pepsi (500ml)', category: 'gaseosa', price: 3.50, img: 'img/pepsi-500ml.jpg' },
+  { id: 'p47', name: 'Pepsi (2.5L)', category: 'gaseosa', price: 6.50, img: 'img/pepsi-2.5l.jpg' },
+
+  // Guaraná
+  { id: 'p48', name: 'Guaraná (500ml)', category: 'gaseosa', price: 3.70, img: 'img/guarana-500ml.jpg' },
+  { id: 'p49', name: 'Guaraná (2L)', category: 'gaseosa', price: 5.80, img: 'img/guarana-2L.jpg' },
+  { id: 'p50', name: 'Guaraná (3L)', category: 'gaseosa', price: 7.50, img: 'img/guarana-3L.jpg' },
+
+  // 7UP
+  { id: 'p51', name: '7UP (500ml)', category: 'gaseosa', price: 3.90, img: 'img/7up-500ml.jpg' },
+  { id: 'p52', name: '7UP (2L)', category: 'gaseosa', price: 6.50, img: 'img/7up-2L.jpg' },
+  { id: 'p53', name: '7UP (3L)', category: 'gaseosa', price: 9.50, img: 'img/7up-3l.jpg' },
+  
+  // Sporade
+  { id: 'p54', name: 'Sporade Tropical (500ml)', category: 'gaseosa', price: 2.40, img: 'img/sporade-rojo.jpg' },
+  { id: 'p55', name: 'Sporade Blueberry (500ml)', category: 'gaseosa', price: 2.40, img: 'img/sporade-azul.png' },
+  { id: 'p56', name: 'Sporade Tropical(1.5L)', category: 'gaseosa', price: 8.50, img: 'img/sporade-rojo1.5.png' },
+  { id: 'p57', name: 'Sporade Blueberry(1.2L)', category: 'gaseosa', price: 8.50, img: 'img/sporade-azul1.2.jpg' },
+
+  //Evervess
+  { id: 'p57', name: 'Evervess (1.5L)', category: 'gaseosa', price: 4.50, img: 'img/Evervess.jpg' },
+
+  // === ❄️ CATEGORÍA INDEPENDIENTE: HIELO ===
+  { id: 'hielo-1kg', name: 'Hielo (1 kg)', category: 'hielo', price: 2.50, img: 'img/bolsa-hielo 1kg.jpg' },
+  { id: 'hielo-2kg', name: 'Hielo (2 kg)', category: 'hielo', price: 4.50, img: 'img/bolsa-hielo 2kg.jpg' },
+  { id: 'hielo-3kg', name: 'Hielo (3 kg)', category: 'hielo', price: 6.50, img: 'img/bolsa-hielo 3kg.jpg' },
+  { id: 'hielo-5kg', name: 'Hielo (5 kg)', category: 'hielo', price: 9.50, img: 'img/bolsa-hielo 5kg.jpg' }
+];
+
+// ✅ MANTENEMOS el carrito interno (solo lógica, sin UI)
+let cart = [];
+
+let currentCategory = 'all';
+
+// === FUNCIONES PRINCIPALES (sin cambios en lógica) ===
+
+function renderCombos() {
+  const container = document.getElementById('combos-container');
+  container.innerHTML = combos.map(combo => {
+    const itemInCart = cart.find(item => item.id === combo.id);
+    const quantity = itemInCart ? itemInCart.quantity : 0;
+    return `
+      <div class="combo">
+        <img src="${combo.img}" alt="${combo.name}">
+        <h4>${combo.name}</h4>
+        <p class="combo-description">${combo.description || ''}</p>
+        <div class="price">S/ ${combo.price.toFixed(2)}</div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button class="add-btn" onclick="addToCart('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${combo.price}, true)">Agregar</button>
+          ${quantity > 0 ? `
+            <div style="display:flex; align-items:center; gap:4px;">
+              <button onclick="removeOneFromCart('${combo.id}')" style="background:#ff7043; color:white; border:none; width:24px; height:24px; border-radius:50%; font-weight:bold; cursor:pointer;">−</button>
+              <span id="counter-${combo.id}" style="background:#8B4513; color:white; border-radius:50%; padding:0 6px; font-size:12px; font-weight:bold; min-width:18px; text-align:center;">
+                ${quantity}
+              </span>
+              <button onclick="addToCart('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${combo.price}, true)" style="background:#8B4513; color:white; border:none; width:24px; height:24px; border-radius:50%; font-weight:bold; cursor:pointer;">+</button>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderProducts(category = 'all') {
+  const filtered = category === 'all' 
+    ? products 
+    : products.filter(p => p.category === category);
+  
+  const container = document.getElementById('products-container');
+  container.innerHTML = filtered.map(product => {
+    const itemInCart = cart.find(item => item.id === product.id);
+    const quantity = itemInCart ? itemInCart.quantity : 0;
+    return `
+      <div class="product">
+        <img src="${product.img}" alt="${product.name}">
+        <h4>${product.name}</h4>
+        <div class="price">S/ ${product.price.toFixed(2)}</div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button class="add-btn" onclick="addToCart('${product.id}', '${product.name.replace(/'/g, "\\'")}', ${product.price}, false)">Agregar</button>
+          ${quantity > 0 ? `
+            <div style="display:flex; align-items:center; gap:4px;">
+              <button onclick="removeOneFromCart('${product.id}')" style="background:#ff7043; color:white; border:none; width:24px; height:24px; border-radius:50%; font-weight:bold; cursor:pointer;">−</button>
+              <span id="counter-${product.id}" style="background:#8B4513; color:white; border-radius:50%; padding:0 6px; font-size:12px; font-weight:bold; min-width:18px; text-align:center;">
+                ${quantity}
+              </span>
+              <button onclick="addToCart('${product.id}', '${product.name.replace(/'/g, "\\'")}', ${product.price}, false)" style="background:#8B4513; color:white; border:none; width:24px; height:24px; border-radius:50%; font-weight:bold; cursor:pointer;">+</button>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function addToCart(id, name, price, isCombo) {
+  const existing = cart.find(item => item.id === id);
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({ id, name, price, quantity: 1, isCombo });
+  }
+  updatePurchaseBar();
+  const item = cart.find(item => item.id === id);
+  const counter = document.getElementById(`counter-${id}`);
+  if (counter) {
+    counter.textContent = item.quantity;
+    counter.style.display = 'inline-block';
+  }
+  if (isCombo) {
+  renderCombos();
+} else {
+  renderProducts(currentCategory);
+}
+}
+
+function removeOneFromCart(id) {
+  const item = cart.find(item => item.id === id);
+  if (item) {
+    if (item.quantity > 1) {
+      item.quantity--;
+    } else {
+      cart = cart.filter(item => item.id !== id);
+    }
+    updatePurchaseBar();
+    const counter = document.getElementById(`counter-${id}`);
+    if (counter) {
+      if (item.quantity > 1) {
+        counter.textContent = item.quantity;
+      } else {
+        counter.style.display = 'none';
+      }
+    }
+    const isCombo = combos.some(combo => combo.id === id);
+    if (isCombo) {
+  renderCombos();
+} else {
+  renderProducts(currentCategory); 
+}
+  }
+}
+
+function sendOrderToWhatsApp() {
+  if (cart.length === 0) {
+    alert("Tu pedido está vacío. Agrega productos antes de comprar.");
+    return;
+  }
+
+  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  let summary = "";
+  cart.forEach(item => {
+    summary += `• ${item.name} x${item.quantity}\n`;
+  });
+
+  const confirmMessage = `¿Deseas enviar este pedido?\n\n${summary}\nTotal: S/ ${total.toFixed(2)}\n\nSe abrirá WhatsApp para confirmar.`;
+
+  if (confirm(confirmMessage)) {
+    const phoneNumber = "+51934892816";
+    let message = "¡Hola! Quisiera hacer un pedido en *Elixir 24/7*:\n\n";
+    cart.forEach(item => {
+      message += `• ${item.name} x${item.quantity} — S/ ${(item.price * item.quantity).toFixed(2)}\n`;
+    });
+    message += `\n*Total: S/ ${total.toFixed(2)}*\n\n¿Podrían confirmarme disponibilidad y método de entrega? ¡Gracias!`;
+
+    const url = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+  }
+}
+
+// === MENÚ ADAPTATIVO ===
+function toggleMenu() {
+  const menu = document.getElementById('mobile-menu');
+  menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+}
+
+function closeMenu() {
+  document.getElementById('mobile-menu').style.display = 'none';
+}
+
+function scrollToSection(id) {
+  const section = document.getElementById(id);
+  if (section) {
+    window.scrollTo({
+      top: section.offsetTop - 70,
+      behavior: 'smooth'
+    });
+  }
+}
+
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('mobile-menu');
+  const toggle = document.getElementById('menu-toggle');
+  if (menu.style.display === 'flex' && 
+      !menu.contains(e.target) && 
+      e.target !== toggle) {
+    menu.style.display = 'none';
+  }
+});
+
+// === MODO OSCURO / CLARO ===
+function initTheme() {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+    updateThemeButton('dark');
+  } else {
+    document.body.classList.remove('dark-mode');
+    updateThemeButton('light');
+  }
+}
+
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark-mode');
+  const newTheme = isDark ? 'dark' : 'light';
+  localStorage.setItem('theme', newTheme);
+  updateThemeButton(newTheme);
+}
+
+function updateThemeButton(theme) {
+  const icon = document.getElementById('theme-icon');
+  const text = document.getElementById('theme-text');
+  if (icon && text) {
+    if (theme === 'dark') {
+      icon.textContent = '☀️';
+      text.textContent = 'Modo claro';
+    } else {
+      icon.textContent = '🌙';
+      text.textContent = 'Modo oscuro';
+    }
+  }
+}
+
+// === ACTUALIZAR BARRA DE COMPRA (único indicador visible) ===
+function updatePurchaseBar() {
+  const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const bar = document.getElementById('purchase-bar');
+  const countEl = document.getElementById('purchase-count');
+  const totalEl = document.getElementById('purchase-total');
+
+  if (count > 0) {
+  countEl.textContent = count;
+  totalEl.textContent = total.toFixed(2);
+  bar.classList.add('show');
+  } else {
+  bar.classList.remove('show');
+  }
+}
+
+// === INICIALIZACIÓN ===
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  const themeButton = document.getElementById('theme-toggle');
+  if (themeButton) {
+    themeButton.addEventListener('click', toggleTheme);
+  }
+
+  renderCombos();
+  renderProducts();
+  updatePurchaseBar();
+
+  document.querySelectorAll('.category-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentCategory = btn.dataset.category; // ✅ Guardamos la categoría
+    renderProducts(currentCategory); // ✅ Renderizamos con la categoría actual
+  });
+  });
+});
+</script>
+</body>
+</html>
