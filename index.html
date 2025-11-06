@@ -340,7 +340,7 @@ function sendOrderToWhatsApp() {
   const confirmMessage = `¿Deseas enviar este pedido?\n\n${summary}\nTotal: S/ ${total.toFixed(2)}\n\nSe abrirá WhatsApp para confirmar.`;
 
   if (confirm(confirmMessage)) {
-    const phoneNumber = "+51934892816";
+    const phoneNumber = "+51910629413";
     let message = "¡Hola! Quisiera hacer un pedido en *Elixir 24/7*:\n\n";
     cart.forEach(item => {
       message += `• ${item.name} x${item.quantity} — S/ ${(item.price * item.quantity).toFixed(2)}\n`;
@@ -457,6 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </body>
 
 </html>
+
 
 
 
